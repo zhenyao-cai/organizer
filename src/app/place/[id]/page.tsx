@@ -15,6 +15,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PlaceCard } from "@/components/PlaceCard";
 import { ItemCard } from "@/components/ItemCard";
+import { TagFilter } from "@/components/TagFilter";
 import { PlaceForm } from "@/components/PlaceForm";
 import { ItemForm } from "@/components/ItemForm";
 import { MovePlaceDialog } from "@/components/MovePlaceDialog";
@@ -48,6 +49,7 @@ export default function PlacePage({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showMovePlace, setShowMovePlace] = useState(false);
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
 
   const [showPlaceForm, setShowPlaceForm] = useState(false);
   const [showItemForm, setShowItemForm] = useState(false);
@@ -189,6 +191,10 @@ export default function PlacePage({
     );
   }
 
+  const filteredItems = tagFilter
+    ? items.filter((item) => item.tags.includes(tagFilter))
+    : items;
+
   const openAddItem = (targetPlaceId: string = id) => {
     setEditingItem(null);
     setItemFormPlaceId(targetPlaceId);
@@ -292,15 +298,24 @@ export default function PlacePage({
               Add
             </button>
           </div>
+          {items.length > 0 && (
+            <div className="mb-3">
+              <TagFilter selected={tagFilter} onChange={setTagFilter} />
+            </div>
+          )}
           {items.length === 0 ? (
             <p className="rounded-xl bg-mint/20 px-4 py-3 text-sm text-ink-light">
               Nothing logged here yet — add an item to this level, or use the{" "}
               <span className="font-semibold">+ Item</span> button on a container
               below.
             </p>
+          ) : filteredItems.length === 0 ? (
+            <p className="rounded-xl bg-mint/20 px-4 py-3 text-sm text-ink-light">
+              No items with this tag here.
+            </p>
           ) : (
             <div className="space-y-2">
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <ItemCard
                   key={item._id}
                   item={item}

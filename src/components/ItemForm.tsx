@@ -5,10 +5,10 @@ import { Modal } from "./Modal";
 import { ImageUpload } from "./ImageUpload";
 import { MoveItemDialog } from "./MoveItemDialog";
 import { PlacePicker } from "./PlacePicker";
+import { TagPicker } from "./TagPicker";
 import { Item, PathSegment } from "@/types";
 import { formatPath } from "@/lib/utils";
 import { Star, ArrowRightLeft, Trash2 } from "lucide-react";
-import Image from "next/image";
 
 interface ItemFormProps {
   open: boolean;
@@ -33,7 +33,6 @@ export function ItemForm({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
   const [starred, setStarred] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -68,14 +67,6 @@ export function ItemForm({
     }
     setShowLocationPicker(pickLocationFirst && !item);
   }, [open, item, placeId, pickLocationFirst]);
-
-  const addTag = () => {
-    const t = tagInput.trim().toLowerCase();
-    if (t && !tags.includes(t)) {
-      setTags([...tags, t]);
-    }
-    setTagInput("");
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,63 +184,18 @@ export function ItemForm({
 
           <div>
             <label className="mb-1.5 block text-sm font-semibold text-ink">
-              Notes
+              Note
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional details..."
-              rows={2}
+              placeholder="Where exactly? Condition? Serial number? Anything helpful..."
+              rows={3}
               className="w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet resize-none"
             />
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold text-ink">
-              Tags
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-                placeholder="electronics, winter..."
-                className="flex-1 rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="rounded-xl bg-peach px-4 py-2.5 text-sm font-semibold text-ink hover:bg-coral/30 transition"
-              >
-                Add
-              </button>
-            </div>
-            {tags.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 rounded-full bg-peach px-2.5 py-1 text-xs font-medium text-ink"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => setTags(tags.filter((t) => t !== tag))}
-                      className="hover:text-coral"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          <TagPicker tags={tags} onChange={setTags} />
 
           <button
             type="button"

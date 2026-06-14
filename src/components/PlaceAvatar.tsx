@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { AppImage } from "./AppImage";
 import { getPlaceIcon } from "@/lib/place-icons";
 
 interface PlaceAvatarProps {
@@ -30,12 +30,12 @@ export function PlaceAvatar({
 
   if (imageUrl) {
     return (
-      <Image
+      <AppImage
         src={imageUrl}
         alt={name}
         width={s.img}
         height={s.img}
-        className={`${s.box} ${s.rounded} object-cover ring-2 ring-lavender shrink-0 ${className}`}
+        className={`${s.box} ${s.rounded} object-cover ring-2 ring-lavender shrink-0 bg-lavender/20 ${className}`}
       />
     );
   }

@@ -5,6 +5,7 @@ import { Search, Star, Package } from "lucide-react";
 import Link from "next/link";
 import { ItemWithPath, PlaceWithPath } from "@/types";
 import { formatPath } from "@/lib/utils";
+import { tagLabel, tagStyle } from "@/lib/tags";
 import { PlaceAvatar } from "./PlaceAvatar";
 
 export function SearchBar() {
@@ -106,9 +107,9 @@ export function SearchBar() {
                       {item.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full bg-peach px-2 py-0.5 text-[10px] font-medium text-ink"
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${tagStyle(tag)}`}
                         >
-                          {tag}
+                          {tagLabel(tag)}
                         </span>
                       ))}
                     </div>

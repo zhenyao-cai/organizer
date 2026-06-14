@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Camera, X, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { AppImage } from "./AppImage";
 import { compressImageFile } from "@/lib/compress-image-client";
 
 interface ImageUploadProps {
@@ -50,12 +50,13 @@ export function ImageUpload({
       </label>
       {value ? (
         <div className="relative inline-block">
-          <Image
+          <AppImage
+            key={value}
             src={value}
             alt="Upload preview"
             width={120}
             height={120}
-            className="h-28 w-28 rounded-2xl object-cover ring-2 ring-blush"
+            className="h-28 w-28 rounded-2xl object-cover ring-2 ring-blush bg-lavender/20"
           />
           <button
             type="button"
@@ -94,6 +95,7 @@ export function ImageUpload({
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
+          e.target.value = "";
         }}
       />
     </div>

@@ -9,16 +9,30 @@ export async function GET(request: NextRequest) {
     await connectDB();
     const placeId = request.nextUrl.searchParams.get("placeId");
     const starred = request.nextUrl.searchParams.get("starred");
+    const tag = request.nextUrl.searchParams.get("tag");
+    const includePath = request.nextUrl.searchParams.get("includePath") === "true";
 
     const filter: Record<string, unknown> = {};
     if (placeId) filter.placeId = placeId;
     if (starred === "true") filter.starred = true;
+    if (tag) filter.tags = tag;
 
     const items = await Item.find(filter)
       .sort({ starred: -1, name: 1 })
       .lean();
 
-    return NextResponse.json(items);
+    if (!includePath) {
+      return NextResponse.json(items);
+    }
+
+    const itemsWithPath = await Promise.all(
+      items.map(async (item) => ({
+        ...item,
+        path: await getPlacePath(item.placeId.toString()),
+      }))
+    );
+
+    return NextResponse.json(itemsWithPath);
   } catch (error) {
     console.error("GET /api/items:", error);
     return NextResponse.json(

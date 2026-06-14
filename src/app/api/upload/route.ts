@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Empty file" }, { status: 400 });
     }
 
-    if (buffer.length > 500_000) {
+    if (buffer.length > 200_000) {
       return NextResponse.json(
         { error: "Image too large after compression" },
         { status: 400 }

@@ -1,6 +1,6 @@
-/** Compress in the browser — avoids sharp/GridFS issues on Netlify. */
-const MAX_SIDE = 320;
-const JPEG_QUALITY = 0.38;
+/** Tiny thumbnails — hundreds of photos stay small in MongoDB. */
+const MAX_SIDE = 180;
+const JPEG_QUALITY = 0.22;
 
 export async function compressImageFile(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file);

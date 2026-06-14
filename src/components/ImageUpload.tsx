@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Camera, X, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { compressImageFile } from "@/lib/compress-image-client";
 
 interface ImageUploadProps {
   value: string | null;
@@ -25,8 +26,9 @@ export function ImageUpload({
     setUploading(true);
     setError(null);
     try {
+      const compressed = await compressImageFile(file);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressed, "photo.jpg");
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
@@ -34,8 +36,8 @@ export function ImageUpload({
         return;
       }
       onChange(data.url);
-    } catch {
-      setError("Upload failed — check your connection");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
       setUploading(false);
     }

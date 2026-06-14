@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { storeImage } from "@/lib/gridfs";
-import { compressImage } from "@/lib/compress-image";
-import { randomUUID } from "crypto";
+import { storeImage } from "@/lib/images";
+
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,11 +20,20 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const raw = Buffer.from(bytes);
-    const compressed = await compressImage(raw);
+    const buffer = Buffer.from(bytes);
 
-    const filename = `${randomUUID()}.jpg`;
-    const id = await storeImage(compressed, filename, "image/jpeg");
+    if (buffer.length === 0) {
+      return NextResponse.json({ error: "Empty file" }, { status: 400 });
+    }
+
+    if (buffer.length > 500_000) {
+      return NextResponse.json(
+        { error: "Image too large after compression" },
+        { status: 400 }
+      );
+    }
+
+    const id = await storeImage(buffer, file.type || "image/jpeg");
 
     return NextResponse.json({ url: `/api/images/${id}` });
   } catch (error) {

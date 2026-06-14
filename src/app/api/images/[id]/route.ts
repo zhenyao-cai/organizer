@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Readable } from "stream";
-import { fetchImage } from "@/lib/gridfs";
+import { fetchImage } from "@/lib/images";
+
+export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -13,11 +14,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Image not found" }, { status: 404 });
     }
 
-    const webStream = Readable.toWeb(
-      result.stream as Readable
-    ) as ReadableStream;
-
-    return new NextResponse(webStream, {
+    return new NextResponse(new Uint8Array(result.buffer), {
       headers: {
         "Content-Type": result.contentType,
         "Cache-Control": "public, max-age=31536000, immutable",

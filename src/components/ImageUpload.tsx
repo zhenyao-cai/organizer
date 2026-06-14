@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Camera, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { Camera, X, Loader2 } from "lucide-react";
 import Image from "next/image";
 
 interface ImageUploadProps {
@@ -18,14 +18,27 @@ export function ImageUpload({
   className = "",
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    if (!res.ok) return;
-    const data = await res.json();
-    onChange(data.url);
+    setUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error || "Upload failed");
+        return;
+      }
+      onChange(data.url);
+    } catch {
+      setError("Upload failed — check your connection");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -54,11 +67,21 @@ export function ImageUpload({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex h-28 w-28 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-violet/40 bg-lavender/30 text-ink-light transition hover:border-violet hover:bg-lavender/50"
+          disabled={uploading}
+          className="flex h-28 w-28 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-violet/40 bg-lavender/30 text-ink-light transition hover:border-violet hover:bg-lavender/50 disabled:opacity-60"
         >
-          <Camera className="h-6 w-6" />
-          <span className="text-xs font-medium">Add photo</span>
+          {uploading ? (
+            <Loader2 className="h-6 w-6 animate-spin" />
+          ) : (
+            <Camera className="h-6 w-6" />
+          )}
+          <span className="text-xs font-medium">
+            {uploading ? "Uploading..." : "Add photo"}
+          </span>
         </button>
+      )}
+      {error && (
+        <p className="mt-1.5 text-xs text-coral font-medium">{error}</p>
       )}
       <input
         ref={inputRef}

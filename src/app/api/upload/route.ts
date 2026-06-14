@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { storeImage } from "@/lib/gridfs";
+import { compressImage } from "@/lib/compress-image";
 import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest) {
@@ -20,21 +20,16 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const raw = Buffer.from(bytes);
+    const compressed = await compressImage(raw);
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${randomUUID()}.${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    const filename = `${randomUUID()}.jpg`;
+    const id = await storeImage(compressed, filename, "image/jpeg");
 
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
-
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    return NextResponse.json({ url: `/api/images/${id}` });
   } catch (error) {
     console.error("POST /api/upload:", error);
-    return NextResponse.json(
-      { error: "Upload failed" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Upload failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

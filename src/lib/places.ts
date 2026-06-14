@@ -1,4 +1,4 @@
-import { Place, IPlace } from "@/models/Place";
+import { Place } from "@/models/Place";
 import { Item } from "@/models/Item";
 import { Types } from "mongoose";
 
@@ -16,7 +16,18 @@ export interface PlaceWithPath {
   }[];
 }
 
-export function normalizePlace(place: IPlace) {
+/** Plain DB shape — works with .lean() results and toObject(). */
+export type PlaceRecord = {
+  _id: Types.ObjectId | string;
+  name: string;
+  icon?: string;
+  parentId?: Types.ObjectId | string | null;
+  imageUrl?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export function normalizePlace(place: PlaceRecord) {
   return {
     _id: place._id.toString(),
     name: place.name,
@@ -42,13 +53,13 @@ export async function getPlacePath(
   let currentId: string | null = placeId;
 
   while (currentId) {
-    const place = await Place.findById(currentId).lean<IPlace>();
+    const place: PlaceRecord | null = await Place.findById(currentId).lean();
     if (!place) break;
     path.unshift({
       _id: place._id.toString(),
       name: place.name,
       icon: place.icon || "Box",
-      imageUrl: place.imageUrl,
+      imageUrl: place.imageUrl ?? null,
     });
     currentId = place.parentId?.toString() ?? null;
   }
@@ -95,7 +106,7 @@ export async function deletePlaceCascade(placeId: string) {
 }
 
 export async function getAllPlacesFlat(): Promise<PlaceWithPath[]> {
-  const places = await Place.find().sort({ name: 1 }).lean<IPlace[]>();
+  const places: PlaceRecord[] = await Place.find().sort({ name: 1 }).lean();
   const placeMap = new Map(places.map((p) => [p._id.toString(), p]));
 
   return places.map((place) => {
@@ -116,7 +127,7 @@ export async function getAllPlacesFlat(): Promise<PlaceWithPath[]> {
         _id: p._id.toString(),
         name: p.name,
         icon: p.icon || "Box",
-        imageUrl: p.imageUrl,
+        imageUrl: p.imageUrl ?? null,
       });
       currentId = p.parentId?.toString() ?? null;
     }
@@ -126,7 +137,7 @@ export async function getAllPlacesFlat(): Promise<PlaceWithPath[]> {
       name: place.name,
       icon: place.icon || "Box",
       parentId: place.parentId?.toString() ?? null,
-      imageUrl: place.imageUrl,
+      imageUrl: place.imageUrl ?? null,
       path,
     };
   });

@@ -45,7 +45,9 @@ export async function POST(request: NextRequest) {
     });
 
     const { normalizePlace } = await import("@/lib/places");
-    return NextResponse.json(normalizePlace(place), { status: 201 });
+    return NextResponse.json(normalizePlace(place.toObject()), {
+      status: 201,
+    });
   } catch (error) {
     console.error("POST /api/places:", error);
     return NextResponse.json(

@@ -22,7 +22,11 @@ export function SearchBar() {
     }
     const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
     const data = await res.json();
-    setResults(data);
+    if (res.ok && data.places && data.items) {
+      setResults(data);
+    } else {
+      setResults({ places: [], items: [] });
+    }
   }, []);
 
   useEffect(() => {

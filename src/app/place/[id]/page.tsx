@@ -45,6 +45,7 @@ export default function PlacePage({
     blockedMoveIds: [] as string[],
   });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showMovePlace, setShowMovePlace] = useState(false);
 
@@ -58,17 +59,31 @@ export default function PlacePage({
   const [editImage, setEditImage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const res = await fetch(`/api/places/${id}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    setPlace(data.place);
-    setChildren(data.children);
-    setItems(data.items);
-    setPath(data.path);
-    setDeleteStats(
-      data.deleteStats || { subPlaceCount: 0, itemCount: 0, blockedMoveIds: [] }
-    );
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/places/${id}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setLoadError(data?.error || "Could not load this place");
+        setLoading(false);
+        return;
+      }
+      setPlace(data.place);
+      setChildren(Array.isArray(data.children) ? data.children : []);
+      setItems(Array.isArray(data.items) ? data.items : []);
+      setPath(Array.isArray(data.path) ? data.path : []);
+      setDeleteStats(
+        data.deleteStats || {
+          subPlaceCount: 0,
+          itemCount: 0,
+          blockedMoveIds: [],
+        }
+      );
+      setLoadError(null);
+    } catch {
+      setLoadError("Could not connect to the server");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -160,8 +175,16 @@ export default function PlacePage({
 
   if (!place) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-ink-light">Place not found</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="font-bold text-ink">
+          {loadError ? "Something went wrong" : "Place not found"}
+        </p>
+        {loadError && (
+          <p className="text-sm text-ink-light max-w-md">{loadError}</p>
+        )}
+        <Link href="/" className="text-sm font-semibold text-violet hover:underline">
+          Back to home
+        </Link>
       </div>
     );
   }

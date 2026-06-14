@@ -13,12 +13,25 @@ export default function HomePage() {
   const [showForm, setShowForm] = useState(false);
   const [showItemForm, setShowItemForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadPlaces = async () => {
-    const res = await fetch("/api/places?parentId=root");
-    const data = await res.json();
-    setPlaces(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/places?parentId=root");
+      const data = await res.json();
+      if (res.ok && Array.isArray(data)) {
+        setPlaces(data);
+        setError(null);
+      } else {
+        setPlaces([]);
+        setError(data?.error || "Could not load rooms");
+      }
+    } catch {
+      setPlaces([]);
+      setError("Could not connect to the server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -64,6 +77,13 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-xl bg-blush/50 px-4 py-3 text-sm text-ink">
+            <p className="font-semibold">Could not load data</p>
+            <p className="mt-1 text-ink-light">{error}</p>
+          </div>
+        )}
 
         {loading ? (
           <div className="space-y-3">

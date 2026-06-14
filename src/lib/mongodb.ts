@@ -23,7 +23,7 @@ if (!global.mongooseCache) {
 
 export async function connectDB() {
   if (!MONGODB_URI) {
-    throw new Error("Please define MONGODB_URI in .env.local");
+    throw new Error("MONGODB_URI is not set");
   }
 
   if (cached.conn) {
@@ -33,9 +33,17 @@ export async function connectDB() {
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
+      maxPoolSize: 1,
+      serverSelectionTimeoutMS: 10000,
     });
   }
 
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null;
+    throw error;
+  }
+
   return cached.conn;
 }

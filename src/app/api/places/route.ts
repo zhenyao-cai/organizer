@@ -17,10 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(places.map((p) => normalizePlace(p)));
   } catch (error) {
     console.error("GET /api/places:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch places" },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch places";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

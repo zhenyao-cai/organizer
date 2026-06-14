@@ -25,7 +25,9 @@ export function TagPicker({ tags, onChange }: TagPickerProps) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-ink">Tags</label>
+      <label className="block text-sm font-semibold text-ink">
+        Tags <span className="font-normal text-ink-light">(select multiple)</span>
+      </label>
 
       <div className="flex flex-wrap gap-2">
         {PRESET_TAGS.map((preset) => {

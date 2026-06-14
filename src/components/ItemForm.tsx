@@ -8,7 +8,13 @@ import { PlacePicker } from "./PlacePicker";
 import { TagPicker } from "./TagPicker";
 import { Item, PathSegment } from "@/types";
 import { formatPath } from "@/lib/utils";
-import { Star, ArrowRightLeft, Trash2 } from "lucide-react";
+import {
+  formatMonthInput,
+  isExpired,
+  parseMonthInput,
+} from "@/lib/expiration";
+import { NEED_TO_FIX_TAG } from "@/lib/tags";
+import { Star, ArrowRightLeft, Trash2, Calendar } from "lucide-react";
 
 interface ItemFormProps {
   open: boolean;
@@ -33,6 +39,7 @@ export function ItemForm({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [expiresMonth, setExpiresMonth] = useState("");
   const [starred, setStarred] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,6 +54,7 @@ export function ItemForm({
       setName(item.name);
       setDescription(item.description);
       setTags(item.tags);
+      setExpiresMonth(formatMonthInput(item.expiresAt));
       setStarred(item.starred);
       setImageUrl(item.imageUrl);
       setSelectedPlaceId(item.placeId);
@@ -57,6 +65,7 @@ export function ItemForm({
       setName("");
       setDescription("");
       setTags([]);
+      setExpiresMonth("");
       setStarred(false);
       setImageUrl(null);
       setSelectedPlaceId(placeId);
@@ -79,6 +88,7 @@ export function ItemForm({
         tags,
         starred,
         imageUrl,
+        expiresAt: expiresMonth || null,
         placeId: isEdit ? item!.placeId : selectedPlaceId,
       };
 
@@ -119,6 +129,17 @@ export function ItemForm({
     if (res.ok) {
       onSaved();
       onClose();
+    }
+  };
+
+  const handleExpiresChange = (value: string) => {
+    setExpiresMonth(value);
+    if (!value) return;
+    const expiresAt = parseMonthInput(value);
+    if (expiresAt && isExpired(expiresAt)) {
+      setTags((prev) =>
+        prev.includes(NEED_TO_FIX_TAG) ? prev : [...prev, NEED_TO_FIX_TAG]
+      );
     }
   };
 
@@ -196,6 +217,33 @@ export function ItemForm({
           </div>
 
           <TagPicker tags={tags} onChange={setTags} />
+
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-ink">
+              Expires
+            </label>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-ink-light shrink-0" />
+              <input
+                type="month"
+                value={expiresMonth}
+                onChange={(e) => handleExpiresChange(e.target.value)}
+                className="flex-1 rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
+              />
+              {expiresMonth && (
+                <button
+                  type="button"
+                  onClick={() => setExpiresMonth("")}
+                  className="rounded-xl bg-lavender/30 px-3 py-2.5 text-xs font-semibold text-ink-light hover:bg-lavender/50"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs text-ink-light">
+              Optional. Past the expiry month, items are tagged Need to fix.
+            </p>
+          </div>
 
           <button
             type="button"

@@ -1,9 +1,10 @@
 "use client";
 
-import { Star, Tag } from "lucide-react";
+import { Star, Tag, Calendar } from "lucide-react";
 import { AppImage } from "./AppImage";
 import { Item } from "@/types";
 import { tagLabel, tagStyle } from "@/lib/tags";
+import { formatExpiryLabel, isExpired } from "@/lib/expiration";
 
 interface ItemCardProps {
   item: Item;
@@ -12,6 +13,8 @@ interface ItemCardProps {
 }
 
 export function ItemCard({ item, onClick, showPath }: ItemCardProps) {
+  const expired = isExpired(item.expiresAt);
+
   return (
     <button
       onClick={onClick}
@@ -46,6 +49,17 @@ export function ItemCard({ item, onClick, showPath }: ItemCardProps) {
           {item.description && (
             <p className="text-sm text-ink-light mt-0.5 line-clamp-2">
               {item.description}
+            </p>
+          )}
+          {item.expiresAt && (
+            <p
+              className={`mt-1 flex items-center gap-1 text-xs font-medium ${
+                expired ? "text-coral" : "text-ink-light"
+              }`}
+            >
+              <Calendar className="h-3 w-3 shrink-0" />
+              {expired ? "Expired" : "Expires"}{" "}
+              {formatExpiryLabel(item.expiresAt)}
             </p>
           )}
           {item.tags.length > 0 && (

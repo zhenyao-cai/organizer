@@ -16,6 +16,7 @@ export interface Item {
   starred: boolean;
   placeId: string;
   imageUrl: string | null;
+  expiresAt: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

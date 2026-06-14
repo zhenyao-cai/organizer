@@ -24,6 +24,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { IconPicker } from "@/components/IconPicker";
 import { Place, Item, PathSegment } from "@/types";
 import { formatPath } from "@/lib/utils";
+import { itemMatchesAnyTag } from "@/lib/items";
 
 export default function PlacePage({
   params,
@@ -49,7 +50,7 @@ export default function PlacePage({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showMovePlace, setShowMovePlace] = useState(false);
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
 
   const [showPlaceForm, setShowPlaceForm] = useState(false);
   const [showItemForm, setShowItemForm] = useState(false);
@@ -191,9 +192,10 @@ export default function PlacePage({
     );
   }
 
-  const filteredItems = tagFilter
-    ? items.filter((item) => item.tags.includes(tagFilter))
-    : items;
+  const filteredItems =
+    tagFilters.length > 0
+      ? items.filter((item) => itemMatchesAnyTag(item.tags, tagFilters))
+      : items;
 
   const openAddItem = (targetPlaceId: string = id) => {
     setEditingItem(null);
@@ -300,7 +302,7 @@ export default function PlacePage({
           </div>
           {items.length > 0 && (
             <div className="mb-3">
-              <TagFilter selected={tagFilter} onChange={setTagFilter} />
+              <TagFilter selected={tagFilters} onChange={setTagFilters} />
             </div>
           )}
           {items.length === 0 ? (

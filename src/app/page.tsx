@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Sparkles, PackagePlus } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Plus, PackagePlus } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
+import { AppLogo } from "@/components/AppLogo";
 import { PlaceCard } from "@/components/PlaceCard";
 import { PlaceForm } from "@/components/PlaceForm";
 import { ItemForm } from "@/components/ItemForm";
@@ -22,7 +23,7 @@ export default function HomePage() {
   const [showItemForm, setShowItemForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [filteredItems, setFilteredItems] = useState<ItemWithPath[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -50,46 +51,52 @@ export default function HomePage() {
     loadPlaces();
   }, []);
 
-  useEffect(() => {
-    if (!tagFilter) {
+  const loadFilteredItems = useCallback(async (tags: string[]) => {
+    if (tags.length === 0) {
       setFilteredItems([]);
       return;
     }
     setLoadingItems(true);
-    fetch(`/api/items?tag=${encodeURIComponent(tagFilter)}&includePath=true`)
-      .then((r) => r.json())
-      .then((data) => {
-        setFilteredItems(Array.isArray(data) ? data : []);
-      })
-      .catch(() => setFilteredItems([]))
-      .finally(() => setLoadingItems(false));
-  }, [tagFilter]);
+    try {
+      const params = new URLSearchParams({ includePath: "true" });
+      tags.forEach((tag) => params.append("tag", tag));
+      const res = await fetch(`/api/items?${params}`);
+      const data = await res.json();
+      setFilteredItems(Array.isArray(data) ? data : []);
+    } catch {
+      setFilteredItems([]);
+    } finally {
+      setLoadingItems(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFilteredItems(tagFilters);
+  }, [tagFilters, loadFilteredItems]);
 
   return (
     <div className="min-h-screen">
       <header className="bg-gradient-to-br from-lavender via-blush to-peach px-4 pb-8 pt-10 sm:px-6">
         <div className="mx-auto max-w-2xl">
-          <div className="mb-6 flex items-center gap-2">
-            <Sparkles className="h-7 w-7 text-violet" />
-            <h1 className="text-3xl font-extrabold text-ink tracking-tight">
-              Yaorganize
-            </h1>
+          <div className="mb-6">
+            <AppLogo size="md" />
           </div>
           <p className="mb-5 text-ink-light font-medium">
             Know exactly where everything lives ✨
           </p>
           <SearchBar />
           <div className="mt-4">
-            <TagFilter selected={tagFilter} onChange={setTagFilter} />
+            <TagFilter selected={tagFilters} onChange={setTagFilters} />
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-        {tagFilter ? (
+        {tagFilters.length > 0 ? (
           <section>
             <h2 className="text-lg font-bold text-ink mb-3">
-              Items tagged &ldquo;{tagLabel(tagFilter)}&rdquo;
+              Items tagged{" "}
+              {tagFilters.map((tag) => tagLabel(tag)).join(", ")}
             </h2>
             {loadingItems ? (
               <div className="space-y-2">
@@ -102,7 +109,7 @@ export default function HomePage() {
               </div>
             ) : filteredItems.length === 0 ? (
               <p className="rounded-xl bg-mint/20 px-4 py-3 text-sm text-ink-light">
-                No items with this tag yet.
+                No items with these tags yet.
               </p>
             ) : (
               <div className="space-y-2">
@@ -160,10 +167,10 @@ export default function HomePage() {
                 ))}
               </div>
             ) : places.length === 0 ? (
-              <div className="rounded-2xl bg-white p-8 text-center card-shadow">
-                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-lavender/40">
-                  <Sparkles className="h-8 w-8 text-violet" />
-                </div>
+            <div className="rounded-2xl bg-white p-8 text-center card-shadow">
+              <div className="mx-auto mb-3 flex justify-center">
+                <AppLogo size="lg" showName={false} />
+              </div>
                 <p className="font-bold text-ink mb-1">No rooms yet</p>
                 <p className="text-sm text-ink-light mb-4">
                   Start by adding your first room — kitchen, bedroom, office...
@@ -211,27 +218,11 @@ export default function HomePage() {
           placeId={editingItem.placeId}
           item={editingItem}
           onSaved={() => {
-            if (tagFilter) {
-              fetch(
-                `/api/items?tag=${encodeURIComponent(tagFilter)}&includePath=true`
-              )
-                .then((r) => r.json())
-                .then((data) =>
-                  setFilteredItems(Array.isArray(data) ? data : [])
-                );
-            }
+            if (tagFilters.length > 0) loadFilteredItems(tagFilters);
           }}
           onDeleted={() => {
             setEditingItem(null);
-            if (tagFilter) {
-              fetch(
-                `/api/items?tag=${encodeURIComponent(tagFilter)}&includePath=true`
-              )
-                .then((r) => r.json())
-                .then((data) =>
-                  setFilteredItems(Array.isArray(data) ? data : [])
-                );
-            }
+            if (tagFilters.length > 0) loadFilteredItems(tagFilters);
           }}
         />
       )}

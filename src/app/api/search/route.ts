@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Item } from "@/models/Item";
 import { Place } from "@/models/Place";
 import { getPlacePath, getAllDescendantIds, isValidObjectId } from "@/lib/places";
+import { normalizeItem } from "@/lib/items";
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,10 +34,13 @@ export async function GET(request: NextRequest) {
     ]);
 
     const itemsWithPath = await Promise.all(
-      items.map(async (item) => ({
-        ...item,
-        path: await getPlacePath(item.placeId.toString()),
-      }))
+      items.map(async (item) => {
+        const normalized = normalizeItem(item);
+        return {
+          ...normalized,
+          path: await getPlacePath(normalized.placeId),
+        };
+      })
     );
 
     const placesWithPath = await Promise.all(

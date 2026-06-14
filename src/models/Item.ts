@@ -7,6 +7,7 @@ export interface IItem extends Document {
   starred: boolean;
   placeId: mongoose.Types.ObjectId;
   imageUrl: string | null;
+  expiresAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +20,7 @@ const ItemSchema = new Schema<IItem>(
     starred: { type: Boolean, default: false },
     placeId: { type: Schema.Types.ObjectId, ref: "Place", required: true },
     imageUrl: { type: String, default: null },
+    expiresAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
@@ -27,6 +29,7 @@ ItemSchema.index({ placeId: 1 });
 ItemSchema.index({ name: "text", description: "text", tags: "text" });
 ItemSchema.index({ starred: 1 });
 ItemSchema.index({ tags: 1 });
+ItemSchema.index({ expiresAt: 1 });
 
 export const Item: Model<IItem> =
   mongoose.models.Item || mongoose.model<IItem>("Item", ItemSchema);

@@ -11,6 +11,10 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "Yaorganize — Your Stuff, Organized",
   description: "Log and organize your belongings by room, container, and item.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PRESET_TAGS, tagLabel, tagStyle } from "@/lib/tags";
+import { PRESET_TAGS, customTagsOnly, tagLabel, tagStyle } from "@/lib/tags";
 
 interface TagFilterProps {
   selected: string[];
@@ -15,14 +15,12 @@ export function TagFilter({ selected, onChange }: TagFilterProps) {
     fetch("/api/tags")
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data.tags)) setCustomTags(data.tags);
+        if (Array.isArray(data.tags)) {
+          setCustomTags(customTagsOnly(data.tags));
+        }
       })
       .catch(() => {});
   }, []);
-
-  const extras = customTags.filter(
-    (t) => !PRESET_TAGS.some((p) => p.id === t)
-  );
 
   const toggle = (tag: string) => {
     if (selected.includes(tag)) {
@@ -67,7 +65,7 @@ export function TagFilter({ selected, onChange }: TagFilterProps) {
             </button>
           );
         })}
-        {extras.map((tag) => {
+        {customTags.map((tag) => {
           const active = selected.includes(tag);
           return (
             <button

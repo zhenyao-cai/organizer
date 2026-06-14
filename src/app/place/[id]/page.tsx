@@ -364,7 +364,7 @@ export default function PlacePage({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 placeholder="Name"
-                className="w-full rounded-xl border border-lavender px-4 py-2.5 outline-none focus:ring-2 focus:ring-violet"
+                className="field-input w-full rounded-xl border border-lavender px-4 py-2.5 outline-none focus:ring-2 focus:ring-violet"
               />
               <ImageUpload
                 value={editImage}

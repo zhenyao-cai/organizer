@@ -198,7 +198,7 @@ export function ItemForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Old phone, Winter jacket"
-              className="w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
+              className="field-input w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
               required
             />
           </div>
@@ -212,7 +212,7 @@ export function ItemForm({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Where exactly? Condition? Serial number? Anything helpful..."
               rows={3}
-              className="w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet resize-none"
+              className="field-input w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet resize-none"
             />
           </div>
 
@@ -228,7 +228,7 @@ export function ItemForm({
                 type="month"
                 value={expiresMonth}
                 onChange={(e) => handleExpiresChange(e.target.value)}
-                className="flex-1 rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
+                className="field-input flex-1 rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
               />
               {expiresMonth && (
                 <button

@@ -1,6 +1,13 @@
 "use client";
 
-import { PRESET_TAGS, normalizeTag, tagLabel, tagStyle } from "@/lib/tags";
+import { useRef } from "react";
+import {
+  PRESET_TAGS,
+  normalizeTag,
+  tagLabel,
+  tagStyle,
+} from "@/lib/tags";
+import { useSavedTags } from "@/hooks/useSavedTags";
 
 interface TagPickerProps {
   tags: string[];
@@ -8,6 +15,9 @@ interface TagPickerProps {
 }
 
 export function TagPicker({ tags, onChange }: TagPickerProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { customTags, rememberTag } = useSavedTags();
+
   const toggle = (tag: string) => {
     if (tags.includes(tag)) {
       onChange(tags.filter((t) => t !== tag));
@@ -20,7 +30,9 @@ export function TagPicker({ tags, onChange }: TagPickerProps) {
     const tag = normalizeTag(raw);
     if (tag && !tags.includes(tag)) {
       onChange([...tags, tag]);
+      rememberTag(tag);
     }
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
@@ -48,28 +60,51 @@ export function TagPicker({ tags, onChange }: TagPickerProps) {
         })}
       </div>
 
+      {customTags.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-ink-light">Your saved tags</p>
+          <div className="flex flex-wrap gap-2">
+            {customTags.map((tag) => {
+              const active = tags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggle(tag)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${tagStyle(tag)} ${
+                    active
+                      ? "ring-2 ring-violet scale-105"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  {active ? "✓ " : ""}
+                  {tagLabel(tag)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2">
         <input
+          ref={inputRef}
           type="text"
-          placeholder="Custom tag..."
-          className="flex-1 rounded-xl border border-lavender bg-white px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-violet"
+          placeholder="New custom tag..."
+          className="field-input flex-1 rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              const input = e.currentTarget;
-              addCustom(input.value);
-              input.value = "";
+              addCustom(e.currentTarget.value);
             }
           }}
         />
         <button
           type="button"
-          onClick={(e) => {
-            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-            addCustom(input.value);
-            input.value = "";
+          onClick={() => {
+            if (inputRef.current) addCustom(inputRef.current.value);
           }}
-          className="rounded-xl bg-peach px-4 py-2.5 text-sm font-semibold text-ink hover:bg-coral/30 transition"
+          className="rounded-xl bg-peach px-4 py-2.5 text-base font-semibold text-ink hover:bg-coral/30 transition"
         >
           Add
         </button>

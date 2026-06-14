@@ -29,3 +29,9 @@ export function tagStyle(tag: string): string {
 export function normalizeTag(input: string): string {
   return input.trim().toLowerCase();
 }
+
+export function customTagsOnly(tags: string[]): string[] {
+  const presetSet = new Set<string>(PRESET_TAG_IDS);
+  return tags.filter((tag) => tag && !presetSet.has(tag));
+}
+

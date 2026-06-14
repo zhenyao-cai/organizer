@@ -104,7 +104,7 @@ export function PlaceForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={isRoot ? "e.g. Kitchen" : "e.g. Closet 1, Drawer 2"}
-            className="w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
+            className="field-input w-full rounded-xl border border-lavender bg-white px-4 py-2.5 text-ink outline-none focus:ring-2 focus:ring-violet"
             required
           />
         </div>

@@ -105,7 +105,7 @@ export function PlacePicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search rooms, closets, drawers..."
-          className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-light"
+          className="field-input flex-1 bg-transparent text-ink outline-none placeholder:text-ink-light"
         />
       </div>
 

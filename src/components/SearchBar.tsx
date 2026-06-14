@@ -51,7 +51,7 @@ export function SearchBar() {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          className="flex-1 bg-transparent text-ink placeholder:text-ink-light outline-none"
+          className="field-input flex-1 bg-transparent text-ink placeholder:text-ink-light outline-none"
         />
       </div>
 

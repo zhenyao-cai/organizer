@@ -1,6 +1,21 @@
 import { StoredImage } from "@/models/StoredImage";
 import { connectDB } from "./mongodb";
 
+function toBuffer(data: unknown): Buffer | null {
+  if (!data) return null;
+  if (Buffer.isBuffer(data)) return data;
+  // MongoDB Binary from .lean() — Buffer.from(binary) gives 0 bytes!
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    "buffer" in data &&
+    (data as { buffer: ArrayBuffer }).buffer
+  ) {
+    return Buffer.from((data as { buffer: ArrayBuffer }).buffer);
+  }
+  return null;
+}
+
 export async function storeImage(
   buffer: Buffer,
   contentType: string
@@ -16,9 +31,13 @@ export async function fetchImage(id: string): Promise<{
 } | null> {
   await connectDB();
   const doc = await StoredImage.findById(id).lean();
-  if (!doc?.data) return null;
+  if (!doc) return null;
+
+  const buffer = toBuffer(doc.data);
+  if (!buffer || buffer.length === 0) return null;
+
   return {
-    buffer: Buffer.from(doc.data),
+    buffer,
     contentType: doc.contentType || "image/jpeg",
   };
 }
